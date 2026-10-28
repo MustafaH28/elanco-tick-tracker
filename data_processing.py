@@ -46,3 +46,15 @@ def process_sightings(sightings):
         "duplicates_removed": duplicate_count,
         "sightings": valid_sightings,
     }
+def filter_by_location(sightings, location):
+    if location is None:
+        return sightings
+
+    location = location.strip().casefold()
+    filtered_sightings = []
+
+    for sighting in sightings:
+        if sighting["location"].strip().casefold() == location:
+            filtered_sightings.append(sighting)
+
+    return filtered_sightings

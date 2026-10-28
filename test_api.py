@@ -72,3 +72,30 @@ class TestAPIErrors(unittest.TestCase):
                     response.json()["detail"],
                     expected_message,
                 )
+class TestLocationFiltering(unittest.TestCase):
+    def test_location_filter_ignores_case_and_spaces(self):
+        client = TestClient(app)
+
+        records = [
+            {"id": "1", "date": "2024-06-15T12:00:00", "location": "London"},
+            {"id": "2", "date": "2024-06-15T12:00:00", "location": "Manchester"},
+        ]
+
+        upstream_response = httpx.Response(
+            200,
+            json=records,
+            request=httpx.Request("GET", "https://example.test/sightings"),
+        )
+
+        with patch("main.httpx.get", return_value=upstream_response):
+            response = client.get(
+                "/sightings",
+                params={"location": "  lOnDoN  "},
+            )
+
+        self.assertEqual(response.status_code, 200)
+
+        result = response.json()
+        self.assertEqual(result["received"], 2)
+        self.assertEqual(result["count"], 1)
+        self.assertEqual(result["sightings"], [records[0]])
