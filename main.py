@@ -1,10 +1,10 @@
 from datetime import date
-
+from typing import Literal
 import httpx
 from fastapi import FastAPI, HTTPException
 
 from data_processing import filter_by_date, filter_by_location, process_sightings
-from reporting import count_by_region
+from reporting import count_by_period, count_by_region
 
 app = FastAPI(title="Elanco Tick Tracker")
 
@@ -89,4 +89,22 @@ def get_regional_counts(
         "invalid_removed": processed["invalid_removed"],
         "duplicates_removed": processed["duplicates_removed"],
         "regions": count_by_region(processed["sightings"]),
+    }
+
+@app.get("/reports/trends")
+def get_trends(
+    period: Literal["weekly", "monthly"] = "monthly",
+    location: str | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
+):
+    processed = load_sightings(location, start_date, end_date)
+
+    return {
+        "received": processed["received"],
+        "count": processed["count"],
+        "invalid_removed": processed["invalid_removed"],
+        "duplicates_removed": processed["duplicates_removed"],
+        "period": period,
+        "trends": count_by_period(processed["sightings"], period),
     }
