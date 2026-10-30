@@ -1,7 +1,9 @@
+from datetime import date
+
 import httpx
 from fastapi import FastAPI, HTTPException
 
-from data_processing import filter_by_location, process_sightings
+from data_processing import filter_by_date, filter_by_location, process_sightings
 
 app = FastAPI(title="Elanco Tick Tracker")
 
@@ -12,7 +14,17 @@ def home():
 
 
 @app.get("/sightings")
-def get_sightings(location: str | None = None):
+def get_sightings(
+    location: str | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
+):
+    if start_date is not None and end_date is not None and start_date > end_date:
+        raise HTTPException(
+            status_code=422,
+            detail="start_date must be on or before end_date.",
+        )
+
     try:
         response = httpx.get(
             "https://dev-task.elancoapps.com/data/tick-sightings",
@@ -47,6 +59,7 @@ def get_sightings(location: str | None = None):
 
     processed = process_sightings(sightings)
     filtered = filter_by_location(processed["sightings"], location)
+    filtered = filter_by_date(filtered, start_date, end_date)
 
     processed["sightings"] = filtered
     processed["count"] = len(filtered)

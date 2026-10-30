@@ -99,3 +99,59 @@ class TestLocationFiltering(unittest.TestCase):
         self.assertEqual(result["received"], 2)
         self.assertEqual(result["count"], 1)
         self.assertEqual(result["sightings"], [records[0]])
+
+class TestDateFiltering(unittest.TestCase):
+
+    def test_date_range_includes_both_boundary_days(self):
+        client = TestClient(app)
+
+        records = [
+            {"id": "before", "date": "2023-12-31T23:59:59", "location": "London"},
+            {"id": "start", "date": "2024-01-01T00:00:00", "location": "London"},
+            {"id": "end", "date": "2024-12-31T23:59:59", "location": "London"},
+            {"id": "after", "date": "2025-01-01T00:00:00", "location": "London"},
+            {"id": "other", "date": "2024-06-15T12:00:00", "location": "Manchester"},
+        ]
+
+        upstream_response = httpx.Response(
+            200,
+            json=records,
+            request=httpx.Request("GET", "https://example.test/sightings"),
+        )
+
+        with patch("main.httpx.get", return_value=upstream_response):
+            response = client.get(
+                "/sightings",
+                params={
+                    "location": "London",
+                    "start_date": "2024-01-01",
+                    "end_date": "2024-12-31",
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+
+        result = response.json()
+        self.assertEqual(result["received"], 5)
+        self.assertEqual(result["count"], 2)
+        self.assertEqual(result["sightings"], [records[1], records[2]])
+
+    def test_invalid_date_inputs_return_422(self):
+        client = TestClient(app)
+
+        cases = [
+            {"start_date": "2024-12-31", "end_date": "2024-01-01"},
+            {"start_date": "2024-02-30"},
+            {"end_date": "not-a-date"},
+        ]
+
+        for params in cases:
+            with self.subTest(params=params):
+                with patch("main.httpx.get") as mocked_get:
+                    response = client.get("/sightings", params=params)
+
+                self.assertEqual(response.status_code, 422)
+                mocked_get.assert_not_called()
+
+
+      
