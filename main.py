@@ -4,6 +4,7 @@ import httpx
 from fastapi import FastAPI, HTTPException
 
 from data_processing import filter_by_date, filter_by_location, process_sightings
+from reporting import count_by_region
 
 app = FastAPI(title="Elanco Tick Tracker")
 
@@ -13,8 +14,7 @@ def home():
     return {"message": "Elanco Tick Tracker API is running"}
 
 
-@app.get("/sightings")
-def get_sightings(
+def load_sightings(
     location: str | None = None,
     start_date: date | None = None,
     end_date: date | None = None,
@@ -65,3 +65,28 @@ def get_sightings(
     processed["count"] = len(filtered)
 
     return processed
+
+@app.get("/sightings")
+def get_sightings(
+    location: str | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
+):
+    return load_sightings(location, start_date, end_date)
+
+
+@app.get("/reports/regions")
+def get_regional_counts(
+    location: str | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
+):
+    processed = load_sightings(location, start_date, end_date)
+
+    return {
+        "received": processed["received"],
+        "count": processed["count"],
+        "invalid_removed": processed["invalid_removed"],
+        "duplicates_removed": processed["duplicates_removed"],
+        "regions": count_by_region(processed["sightings"]),
+    }
