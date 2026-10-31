@@ -6,6 +6,14 @@ A Python backend built for the Elanco Software Engineer Placement technical task
 
 Data source: [Elanco tick-sightings API](https://dev-task.elancoapps.com/data/tick-sightings).
 
+## Video walkthrough
+
+[Download the captioned walkthrough (MP4, 6 minutes 17 seconds)](docs/Elanco_Tick_Tracker_Walkthrough.mp4?raw=true)
+
+The walkthrough is in 1080p and uses on-screen captions. It covers the code structure, data cleaning, location/date filtering, regional counts, weekly/monthly trends, error handling, automated tests and the larger-dataset strategy.
+
+[Optional subtitle file (SRT)](docs/Elanco_Tick_Tracker_Captions.srt?raw=true)
+
 ## Features
 
 - Clean source records and report how many invalid records and duplicate IDs were removed.
@@ -215,3 +223,4 @@ These are planned improvements, not features claimed by the current MVP. Other f
 - [HTTPX: timeout behaviour](https://www.python-httpx.org/advanced/timeouts/)
 - [pip freeze: recorded package versions](https://pip.pypa.io/en/stable/cli/pip_freeze/)
 - [pip check: installed dependency compatibility](https://pip.pypa.io/en/stable/cli/pip_check/)
+

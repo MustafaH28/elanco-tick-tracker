@@ -1,0 +1,174 @@
+1
+00:00:00,000 --> 00:00:07,000
+Mustafa Hassan — Elanco Tick Tracker. A Python/FastAPI backend for cleaning,
+filtering and reporting tick-sighting data.
+
+2
+00:00:07,000 --> 00:00:19,000
+This backend retrieves Elanco’s tick-sighting data, cleans it and exposes
+search, regional totals and reports over time.
+
+3
+00:00:19,000 --> 00:00:31,000
+Python keeps the processing rules straightforward. FastAPI provides the
+endpoints and interactive documentation; HTTPX retrieves the source data.
+
+4
+00:00:31,000 --> 00:00:43,000
+The README includes environment setup, pinned dependencies and the Uvicorn
+command used to run the API locally.
+
+5
+00:00:43,000 --> 00:00:52,000
+Three modules separate the responsibilities: requests in main.py, cleaning and
+filtering in data_processing.py, and summaries in reporting.py.
+
+6
+00:00:52,000 --> 00:01:03,000
+The API connects the processing and reporting modules. Keeping these rules
+separate makes them reusable across endpoints and easier to test.
+
+7
+00:01:03,000 --> 00:01:15,000
+load_sightings accepts optional location, start-date and end-date filters. Every
+data endpoint uses this helper for the same loading and processing rules.
+
+8
+00:01:15,000 --> 00:01:27,000
+Each usable record needs a non-empty ID, date and location. The date must parse
+successfully before the record can enter a report.
+
+9
+00:01:27,000 --> 00:01:35,000
+Validation comes before duplicate detection. A set tracks accepted IDs, avoiding
+repeated searches through the growing list of records.
+
+10
+00:01:35,000 --> 00:01:44,000
+The first valid record for each exact ID is kept. Later valid records with the
+same ID are counted as duplicates.
+
+11
+00:01:44,000 --> 00:01:53,000
+Location and date filters run on the cleaned records. Reports therefore use the
+same valid, unique sightings as the search endpoint.
+
+12
+00:01:53,000 --> 00:02:01,000
+The unfiltered endpoint returns 1,000 sightings in this source batch. Its
+counters make record cleanup visible to the caller.
+
+13
+00:02:01,000 --> 00:02:09,000
+Each sighting retains its original fields. Here, no invalid records or duplicate
+IDs were removed from the downloaded batch.
+
+14
+00:02:09,000 --> 00:02:20,000
+This request combines London with the 2024 date range. The result contains two
+matching sightings, while received still describes the full source batch.
+
+15
+00:02:20,000 --> 00:02:32,000
+Both boundary dates are included. Location matching ignores case and surrounding
+spaces; either date limit can also be used on its own.
+
+16
+00:02:32,000 --> 00:02:46,000
+The source contains cities rather than regions. An explicit lookup maps known
+cities to reporting groups; unmapped cities remain counted under Unknown.
+
+17
+00:02:46,000 --> 00:02:56,000
+The regional endpoint counts the cleaned sightings in each group. Here, the
+unfiltered report covers all 1,000 sightings.
+
+18
+00:02:56,000 --> 00:03:07,000
+Regions are returned alphabetically. The same location and date filters can
+narrow this report before the totals are calculated.
+
+19
+00:03:07,000 --> 00:03:18,000
+The weekly report groups London’s two 2024 sightings into their calendar weeks.
+Each period_start identifies the Monday that begins that week.
+
+20
+00:03:18,000 --> 00:03:30,000
+The sightings fall in the weeks beginning 15 July and 23 September. Each of
+these weeks contains one matching sighting.
+
+21
+00:03:30,000 --> 00:03:40,000
+Changing period to monthly groups the same sightings by calendar month. The
+labels now show the first day of July and September.
+
+22
+00:03:40,000 --> 00:03:49,000
+Trend results are chronological. Only periods containing matching sightings are
+included, and monthly is the default when period is omitted.
+
+23
+00:03:49,000 --> 00:04:05,000
+In the interactive documentation, the start date is set after the end date to
+demonstrate how the API rejects an invalid range.
+
+24
+00:04:05,000 --> 00:04:17,000
+The response is HTTP 422 with a clear explanation: start_date must be on or
+before end_date. This check runs before contacting Elanco.
+
+25
+00:04:17,000 --> 00:04:29,000
+Upstream timeouts return HTTP 504. Network failures, unsuccessful responses,
+invalid JSON and an unexpected outer data structure return HTTP 502.
+
+26
+00:04:29,000 --> 00:04:37,000
+The test command runs the processing, API and reporting suites together.
+Controlled upstream responses make these checks repeatable.
+
+27
+00:04:37,000 --> 00:04:48,000
+The checks cover cleanup, filtering, upstream failures, unknown cities and
+reporting boundaries, including weeks and months that cross New Year.
+
+28
+00:04:48,000 --> 00:05:00,000
+The completed run reports 12 tests and OK. Additional cases are exercised
+through subtests, including invalid inputs and both trend periods.
+
+29
+00:05:00,000 --> 00:05:14,000
+The current MVP downloads and processes a full batch in memory for every data
+request. The README explains the limits of this approach.
+
+30
+00:05:14,000 --> 00:05:25,000
+Cleaning uses one pass with an ID set, and filtering is linear. Memory grows
+with the batch size; reports also sort their output groups.
+
+31
+00:05:25,000 --> 00:05:38,000
+For larger datasets, the plan separates background ingestion from requests,
+bounds the ingestion work and stores records with useful indexes.
+
+32
+00:05:38,000 --> 00:05:50,000
+Filtering and aggregation would move into storage, with paginated sighting lists
+and cached reports. Monitoring and bounded retries would support reliability.
+
+33
+00:05:50,000 --> 00:06:00,000
+These are proposed improvements. The current implementation remains the working
+in-memory backend demonstrated here, with its limitations documented.
+
+34
+00:06:00,000 --> 00:06:10,000
+The public repository contains the source, tests and README, including setup
+instructions, example requests, design choices and the larger-dataset plan.
+
+35
+00:06:10,000 --> 00:06:17,000
+Elanco Tick Tracker — Mustafa Hassan. Source code, tests and setup instructions
+are available in the public GitHub repository.
