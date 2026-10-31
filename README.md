@@ -8,7 +8,9 @@ Data source: [Elanco tick-sightings API](https://dev-task.elancoapps.com/data/ti
 
 ## Video walkthrough
 
-[Download the captioned walkthrough (MP4, 6 minutes 17 seconds)](docs/Elanco_Tick_Tracker_Walkthrough.mp4?raw=true)
+[Open the captioned walkthrough (MP4, 6 minutes 17 seconds)](https://github.com/MustafaH28/elanco-tick-tracker/blob/main/docs/Elanco_Tick_Tracker_Walkthrough.mp4)
+
+On the file page, click **Download raw file** (the downward arrow) to download and watch the video.
 
 The walkthrough is in 1080p and uses on-screen captions. It covers the code structure, data cleaning, location/date filtering, regional counts, weekly/monthly trends, error handling, automated tests and the larger-dataset strategy.
 
